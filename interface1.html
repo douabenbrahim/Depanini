@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en" id="app-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Dépanini — Student Item Rental</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-page: #faf9f8;
+      --surface: #ffffff;
+      --text-primary: #1e1e1e;
+      --text-secondary: #5e5e5e;
+      --text-muted: #8a8a8a;
+      --border-light: #e6e6e6;
+      --accent: #e67e22;
+      --accent-hover: #d96c0e;
+      --accent-soft: #fdf4e6;
+      --hero-overlay: rgba(0, 0, 0, 0.52);
+      --input-bg: #ffffff;
+      --error: #e74c3c;
+    }
+
+    body.dark {
+      --bg-page: #121212;
+      --surface: #1e1e2a;
+      --text-primary: #f0f0f0;
+      --text-secondary: #b8b8b8;
+      --text-muted: #8a8a8a;
+      --border-light: #2d2d3a;
+      --input-bg: #2a2a36;
+      --accent-soft: #2a241e;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(var(--hero-overlay), var(--hero-overlay)),
+                  url('https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=1600&q=80') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .navbar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 1.5rem 2rem;
+      z-index: 30;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(12px);
+      padding: 0.5rem 1.4rem;
+      border-radius: 48px;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .nav-links button {
+      background: none;
+      border: none;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 0.35rem 0.2rem;
+      transition: opacity 0.2s;
+    }
+
+    .nav-links button:hover { opacity: 0.7; }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 6rem 5% 4rem;
+      text-align: center;
+    }
+
+    .brand-section {
+      max-width: 680px;
+      color: white;
+      animation: fadeInUp 0.9s ease-out;
+    }
+
+    .logo-wrap {
+      margin-bottom: 1.2rem;
+    }
+
+    .logo-wrap h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 5.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #FFE6B0 0%, #FFB347 35%, #FF8C42 70%, #FF6035 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmer 3.5s ease infinite, floatY 3s ease-in-out infinite;
+      letter-spacing: -2px;
+      display: inline-block;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.25));
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tagline {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      opacity: 0.92;
+      font-weight: 400;
+      margin-bottom: 2rem;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      letter-spacing: 0.1px;
+    }
+
+    .enter-btn {
+      background: linear-gradient(135deg, #FF8C42, #FF5D35);
+      border: none;
+      padding: 1rem 2.8rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      color: white;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 28px rgba(230,126,34,0.45);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      letter-spacing: 0.3px;
+    }
+
+    .enter-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 36px rgba(230,126,34,0.55);
+    }
+
+    /* MODALS */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      color: var(--text-primary);
+      border-radius: 28px;
+      max-width: 480px;
+      width: 92%;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 2rem 2rem 1.5rem;
+      border: 1px solid var(--border-light);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+      animation: slideUp 0.25s ease-out;
+      position: relative;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.2rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover { color: var(--text-primary); }
+
+    .modal-box h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.4rem;
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 0.35rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: 14px;
+      border: 1.5px solid var(--border-light);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(230,126,34,0.15);
+    }
+
+    .error-text {
+      color: var(--error);
+      font-size: 0.72rem;
+      margin-top: 0.2rem;
+    }
+
+    .gender-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+    }
+
+    .gender-row label {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--text-primary);
+      cursor: pointer;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, #FF8C42, #FF5D35);
+      border: none;
+      border-radius: 40px;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.4rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(230,126,34,0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(230,126,34,0.4);
+    }
+
+    .modal-footer {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .modal-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Settings modal specific */
+    .setting-row {
+      margin: 1.2rem 0;
+    }
+
+    .setting-row label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    .setting-row select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border-radius: 40px;
+      border: 1.5px solid var(--border-light);
+      background: var(--input-bg);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .btn-toggle-theme {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 40px;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-toggle-theme:hover { background: var(--accent-hover); }
+
+    .btn-close-outline {
+      width: 100%;
+      margin-top: 1.2rem;
+      padding: 0.65rem;
+      background: transparent;
+      border: 1.5px solid var(--border-light);
+      border-radius: 40px;
+      cursor: pointer;
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .btn-close-outline:hover { background: var(--accent-soft); }
+
+    @media (max-width: 640px) {
+      .logo-wrap h1 { font-size: 3.4rem; }
+      .tagline { font-size: 1rem; }
+      .navbar { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <nav class="navbar">
+    <div class="nav-links">
+      <button id="btnSettings">⚙ Settings</button>
+      <button id="btnLogin">Log In</button>
+    </div>
+  </nav>
+
+  <div class="main-container">
+    <div class="brand-section">
+      <div class="logo-wrap">
+        <h1>dépanini</h1>
+      </div>
+      <p class="tagline" id="heroText">Borrow what you need, lend what you don't. From textbooks to tech — student-to-student rentals made simple, affordable, and close to campus.</p>
+      <a href="interface2.html" class="enter-btn" id="btnExplore">✦ Explore Dépanini</a>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" data-close="loginModal">×</button>
+    <h2 id="loginTitle">Log In</h2>
+    <div class="field">
+      <label id="lbl_email">Email</label>
+      <input type="email" id="loginEmail" placeholder="student@university.edu">
+    </div>
+    <div class="field">
+      <label id="lbl_password">Password</label>
+      <input type="password" id="loginPassword" placeholder="··········">
+    </div>
+    <button class="btn-submit" id="btnLoginSubmit">Log In</button>
+    <div class="modal-footer">
+      <a id="linkForgot">Forgot Password?</a> &nbsp;·&nbsp;
+      <a id="linkToSignup">Create Account</a>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div id="signupModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" data-close="signupModal">×</button>
+    <h2 id="signupTitle">Sign Up</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+      <div class="field">
+        <label id="lbl_fname">First Name</label>
+        <input type="text" id="signupFirstName" placeholder="Amira">
+      </div>
+      <div class="field">
+        <label id="lbl_lname">Last Name</label>
+        <input type="text" id="signupLastName" placeholder="Ben Ali">
+      </div>
+    </div>
+    <div class="field">
+      <label id="lbl_dob">Date of Birth</label>
+      <input type="date" id="signupDob">
+    </div>
+    <div class="field">
+      <label id="lbl_gender">Gender</label>
+      <div class="gender-row">
+        <label><input type="radio" name="gender" value="Male"> Male</label>
+        <label><input type="radio" name="gender" value="Female"> Female</label>
+        <label><input type="radio" name="gender" value="Other"> Other</label>
+        <label><input type="radio" name="gender" value="Prefer not to say"> Prefer not to say</label>
+      </div>
+    </div>
+    <div class="field">
+      <label id="lbl_signup_email">Email</label>
+      <input type="email" id="signupEmail" placeholder="student@university.edu">
+      <div class="error-text" id="emailErr"></div>
+    </div>
+    <div class="field">
+      <label id="lbl_signup_pwd">Password</label>
+      <input type="password" id="signupPassword" placeholder="Min 8 chars, letters & numbers">
+      <div class="error-text" id="pwdErr"></div>
+    </div>
+    <button class="btn-submit" id="btnSignupSubmit">Create Account</button>
+    <div class="modal-footer">
+      <span id="txt_haveAccount">Already have an account?</span> <a id="linkToLogin">Log In</a>
+    </div>
+  </div>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div id="forgotModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" data-close="forgotModal">×</button>
+    <h2 id="forgotTitle">Reset Password</h2>
+    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.2rem;" id="forgotDesc">Enter your email and we'll send you a reset link.</p>
+    <div class="field">
+      <label id="lbl_forgot_email">Email</label>
+      <input type="email" id="forgotEmail" placeholder="student@university.edu">
+    </div>
+    <button class="btn-submit" id="btnForgotSubmit">Send Reset Link</button>
+    <div class="modal-footer">
+      <a id="linkBackToLogin">← Back to Login</a>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settingsModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" data-close="settingsModal">×</button>
+    <h2 id="settingsTitle">Settings</h2>
+    <div class="setting-row">
+      <label id="lbl_lang">Language</label>
+      <select id="langSelect">
+        <option value="en">🇬🇧 English</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="ar">🇹🇳 العربية</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <label id="lbl_appearance">Appearance</label>
+      <button class="btn-toggle-theme" id="btnThemeToggle">🌙 Dark Mode</button>
+    </div>
+    <button class="btn-close-outline" data-close="settingsModal" id="lbl_close">Close</button>
+  </div>
+</div>
+
+<script>
+const T = {
+  en: {
+    heroText: "Borrow what you need, lend what you don't. From textbooks to tech — student-to-student rentals made simple, affordable, and close to campus.",
+    exploreBtn: "✦ Explore Dépanini",
+    loginTitle: "Log In", signupTitle: "Sign Up", forgotTitle: "Reset Password", settingsTitle: "Settings",
+    lbl_email: "Email", lbl_password: "Password", lbl_fname: "First Name", lbl_lname: "Last Name",
+    lbl_dob: "Date of Birth", lbl_gender: "Gender", lbl_signup_email: "Email", lbl_signup_pwd: "Password",
+    lbl_forgot_email: "Email", lbl_lang: "Language", lbl_appearance: "Appearance",
+    loginBtn: "Log In", signupBtn: "Create Account", forgotBtn: "Send Reset Link",
+    dark: "🌙 Dark Mode", light: "☀️ Light Mode", close: "Close",
+    forgotDesc: "Enter your email and we'll send you a reset link.",
+    linkForgot: "Forgot Password?", linkToSignup: "Create Account", linkToLogin: "Log In",
+    linkBackToLogin: "← Back to Login", txt_haveAccount: "Already have an account?",
+    emailInvalid: "Enter a valid email (e.g. name@domain.com)",
+    pwdInvalid: "Min 8 characters, include letters and numbers",
+    fillAll: "Please fill in all required fields.",
+    signupOk: "Account created! Please log in.",
+    loginOk: "Welcome back to Dépanini!",
+    forgotOk: "Reset link sent (demo).",
+    loginFail: "Invalid email or password.",
+  },
+  fr: {
+    heroText: "Emprunte ce dont tu as besoin, prête ce que tu n'utilises pas. Des manuels à la tech — location entre étudiants simple, abordable et proche du campus.",
+    exploreBtn: "✦ Explorer Dépanini",
+    loginTitle: "Connexion", signupTitle: "Inscription", forgotTitle: "Réinitialisation", settingsTitle: "Paramètres",
+    lbl_email: "E-mail", lbl_password: "Mot de passe", lbl_fname: "Prénom", lbl_lname: "Nom",
+    lbl_dob: "Date de naissance", lbl_gender: "Genre", lbl_signup_email: "E-mail", lbl_signup_pwd: "Mot de passe",
+    lbl_forgot_email: "E-mail", lbl_lang: "Langue", lbl_appearance: "Apparence",
+    loginBtn: "Se connecter", signupBtn: "Créer un compte", forgotBtn: "Envoyer le lien",
+    dark: "🌙 Mode sombre", light: "☀️ Mode clair", close: "Fermer",
+    forgotDesc: "Entrez votre e-mail pour recevoir un lien de réinitialisation.",
+    linkForgot: "Mot de passe oublié ?", linkToSignup: "Créer un compte", linkToLogin: "Connexion",
+    linkBackToLogin: "← Retour", txt_haveAccount: "Déjà un compte ?",
+    emailInvalid: "Adresse e-mail invalide (ex: nom@domaine.com)",
+    pwdInvalid: "8 caractères min., lettres et chiffres",
+    fillAll: "Veuillez remplir tous les champs.",
+    signupOk: "Compte créé ! Veuillez vous connecter.", loginOk: "Bienvenue sur Dépanini !",
+    forgotOk: "Lien envoyé (démo).", loginFail: "Email ou mot de passe incorrect.",
+  },
+  ar: {
+    heroText: "استعر ما تحتاجه، أعِر ما لا تستخدمه. من الكتب إلى الأجهزة — تأجير بين الطلاب بسيط وبأسعار معقولة.",
+    exploreBtn: "✦ استكشف Dépanini",
+    loginTitle: "تسجيل الدخول", signupTitle: "إنشاء حساب", forgotTitle: "استعادة كلمة المرور", settingsTitle: "الإعدادات",
+    lbl_email: "البريد الإلكتروني", lbl_password: "كلمة المرور", lbl_fname: "الاسم الأول", lbl_lname: "اسم العائلة",
+    lbl_dob: "تاريخ الميلاد", lbl_gender: "الجنس", lbl_signup_email: "البريد الإلكتروني", lbl_signup_pwd: "كلمة المرور",
+    lbl_forgot_email: "البريد الإلكتروني", lbl_lang: "اللغة", lbl_appearance: "المظهر",
+    loginBtn: "دخول", signupBtn: "إنشاء حساب", forgotBtn: "إرسال رابط الاستعادة",
+    dark: "🌙 الوضع المظلم", light: "☀️ الوضع الفاتح", close: "إغلاق",
+    forgotDesc: "أدخل بريدك الإلكتروني لإرسال رابط إعادة التعيين.",
+    linkForgot: "نسيت كلمة المرور؟", linkToSignup: "إنشاء حساب", linkToLogin: "تسجيل الدخول",
+    linkBackToLogin: "← العودة", txt_haveAccount: "لديك حساب بالفعل؟",
+    emailInvalid: "بريد إلكتروني غير صحيح",
+    pwdInvalid: "8 أحرف على الأقل مع أرقام وحروف",
+    fillAll: "يرجى ملء جميع الحقول.",
+    signupOk: "تم إنشاء الحساب! يرجى تسجيل الدخول.",
+    loginOk: "مرحباً بك في Dépanini!",
+    forgotOk: "تم إرسال رابط الاستعادة (تجريبي).",
+    loginFail: "بريد إلكتروني أو كلمة مرور غير صحيحة.",
+  }
+};
+
+let lang = localStorage.getItem("dep_lang") || "en";
+let dark = localStorage.getItem("dep_theme") === "dark";
+// FIXED: Use relative path for API calls
+const API_URL = 'api/';
+
+function t(k) { return (T[lang] && T[lang][k]) || T.en[k] || k; }
+
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.getElementById("app-root").dir = lang === "ar" ? "rtl" : "ltr";
+  document.getElementById("heroText").textContent = t("heroText");
+  document.getElementById("btnExplore").textContent = t("exploreBtn");
+  const ids = ["loginTitle","signupTitle","forgotTitle","settingsTitle",
+    "lbl_email","lbl_password","lbl_fname","lbl_lname","lbl_dob","lbl_gender",
+    "lbl_signup_email","lbl_signup_pwd","lbl_forgot_email","lbl_lang","lbl_appearance",
+    "forgotDesc","linkForgot","linkToSignup","linkToLogin","linkBackToLogin","txt_haveAccount","lbl_close"];
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t(id); });
+  document.getElementById("btnLoginSubmit").textContent = t("loginBtn");
+  document.getElementById("btnSignupSubmit").textContent = t("signupBtn");
+  document.getElementById("btnForgotSubmit").textContent = t("forgotBtn");
+  document.getElementById("langSelect").value = lang;
+  updateThemeBtn();
+}
+
+function applyTheme() {
+  document.body.classList.toggle("dark", dark);
+  updateThemeBtn();
+}
+
+function updateThemeBtn() {
+  const btn = document.getElementById("btnThemeToggle");
+  if (btn) btn.textContent = dark ? t("light") : t("dark");
+}
+
+// Modal helpers
+function openModal(id) { document.getElementById(id).classList.add("active"); }
+function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+
+document.querySelectorAll("[data-close]").forEach(el => {
+  el.addEventListener("click", () => closeModal(el.dataset.close));
+});
+
+document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  overlay.addEventListener("click", e => {
+    if (e.target === overlay) overlay.classList.remove("active");
+  });
+});
+
+// Nav
+document.getElementById("btnLogin").addEventListener("click", () => openModal("loginModal"));
+document.getElementById("btnSettings").addEventListener("click", () => openModal("settingsModal"));
+
+// Cross-modal links
+document.getElementById("linkForgot").addEventListener("click", () => { closeModal("loginModal"); openModal("forgotModal"); });
+document.getElementById("linkToSignup").addEventListener("click", () => { closeModal("loginModal"); openModal("signupModal"); });
+document.getElementById("linkToLogin").addEventListener("click", () => { closeModal("signupModal"); openModal("loginModal"); });
+document.getElementById("linkBackToLogin").addEventListener("click", () => { closeModal("forgotModal"); openModal("loginModal"); });
+
+// Settings
+document.getElementById("langSelect").addEventListener("change", e => {
+  lang = e.target.value;
+  localStorage.setItem("dep_lang", lang);
+  applyLang();
+});
+
+document.getElementById("btnThemeToggle").addEventListener("click", () => {
+  dark = !dark;
+  localStorage.setItem("dep_theme", dark ? "dark" : "light");
+  applyTheme();
+});
+
+// Validation
+function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function validPwd(p) { return p.length >= 8 && /[A-Za-z]/.test(p) && /[0-9]/.test(p); }
+
+// ─── REAL API CALLS ──────────────────────────────────────
+async function apiCall(endpoint, data = null) {
+  const options = {
+    method: data ? 'POST' : 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include'
+  };
+  if (data) {
+    options.body = JSON.stringify(data);
+  }
+  
+  try {
+    const response = await fetch(API_URL + endpoint, options);
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    return { success: false, error: 'Network error' };
+  }
+}
+
+// FIXED: Login with correct redirect paths
+document.getElementById("btnLoginSubmit").addEventListener("click", async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  
+  if (!email || !password) { alert(t("fillAll")); return; }
+  
+  // Show loading state
+  const loginBtn = document.getElementById("btnLoginSubmit");
+  const originalText = loginBtn.textContent;
+  loginBtn.textContent = "Logging in...";
+  loginBtn.disabled = true;
+  
+  const result = await apiCall('login.php', { email, password });
+  
+  loginBtn.textContent = originalText;
+  loginBtn.disabled = false;
+  
+  if (result.success) {
+    localStorage.setItem('dep_session', JSON.stringify(result.user));
+    closeModal("loginModal");
+    alert(t("loginOk"));
+    
+    // FIXED: Use absolute paths from web root
+    if (result.user.role === 'admin') {
+      window.location.href = '/depanini/admin/admin_panel.html';
+    } else {
+      window.location.href = '/depanini/interface2.html';
+    }
+  } else {
+    alert(result.error || t("loginFail"));
+  }
+});
+
+// Signup
+document.getElementById("btnSignupSubmit").addEventListener("click", async () => {
+  const firstName = document.getElementById("signupFirstName").value.trim();
+  const lastName = document.getElementById("signupLastName").value.trim();
+  const dob = document.getElementById("signupDob").value;
+  const gender = document.querySelector('input[name="gender"]:checked')?.value || "";
+  const email = document.getElementById("signupEmail").value.trim();
+  const password = document.getElementById("signupPassword").value;
+
+  let ok = true;
+  document.getElementById("emailErr").textContent = "";
+  document.getElementById("pwdErr").textContent = "";
+
+  if (!firstName || !lastName || !dob || !gender || !email || !password) { alert(t("fillAll")); return; }
+  if (!validEmail(email)) { document.getElementById("emailErr").textContent = t("emailInvalid"); ok = false; }
+  if (!validPwd(password)) { document.getElementById("pwdErr").textContent = t("pwdInvalid"); ok = false; }
+  if (!ok) return;
+
+  const signupBtn = document.getElementById("btnSignupSubmit");
+  const originalText = signupBtn.textContent;
+  signupBtn.textContent = "Creating account...";
+  signupBtn.disabled = true;
+
+  const result = await apiCall('register.php', { firstName, lastName, email, password, dob, gender });
+  
+  signupBtn.textContent = originalText;
+  signupBtn.disabled = false;
+  
+  if (result.success) {
+    alert(t("signupOk"));
+    closeModal("signupModal");
+    openModal("loginModal");
+  } else {
+    alert(result.error);
+  }
+});
+
+// Forgot Password
+document.getElementById("btnForgotSubmit").addEventListener("click", async () => {
+  const email = document.getElementById("forgotEmail").value.trim();
+  if (!email || !validEmail(email)) { alert(t("emailInvalid")); return; }
+  alert(t("forgotOk"));
+  closeModal("forgotModal");
+  openModal("loginModal");
+});
+
+// FIXED: Check if already logged in - redirect with correct paths
+async function checkExistingSession() {
+  const result = await apiCall('check_session.php');
+  if (result.success && result.user) {
+    localStorage.setItem('dep_session', JSON.stringify(result.user));
+    if (result.user.role === 'admin') {
+      window.location.href = '/depanini/admin/admin_panel.html';
+    } else {
+      window.location.href = '/depanini/interface2.html';
+    }
+  }
+}
+
+// Init
+applyLang();
+applyTheme();
+checkExistingSession();
+</script>
+</body>
+</html>
